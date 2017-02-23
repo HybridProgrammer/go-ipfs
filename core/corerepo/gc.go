@@ -92,27 +92,28 @@ func GarbageCollect(n *core.IpfsNode, ctx context.Context) error {
 	}
 	rmed, erro := gc.GC(ctx, n.Blockstore, n.DAG, n.Pinning, roots)
 
-	var errs []error
-	for {
+	var errors []error
+	for rmed != nil || erro != nil {
 		select {
 		case _, ok := <-rmed:
 			if !ok {
-				return nil
+				rmed = nil
 			}
-		case err := <-erro:
-			errs = append(errs, err)
-		case <-ctx.Done():
-			errs = append(errs, ctx.Err())
+		case err, ok := <-erro:
+			if ok {
+				errors = append(errors, err)
+			} else {
+				erro = nil
+			}
 		}
 	}
-
-	switch len(errs) {
+	switch len(errors) {
 	case 0:
 		return nil
 	case 1:
-		return errs[0]
+		return errors[0]
 	default:
-		return NewMultiError(errs...)
+		return NewMultiError(errors...)
 	}
 }
 

@@ -66,16 +66,20 @@ order to reclaim hard disk space.
 		go func() {
 			defer close(outChan)
 			var errors []error
-			for {
+			for gcOutChan != nil || erro != nil {
 				select {
 				case k, ok := <-gcOutChan:
 					if ok {
 						outChan <- k
 					} else {
-						return
+						gcOutChan = nil
 					}
-				case err := <-erro:
-					errors = append(errors, err)
+				case err, ok := <-erro:
+					if ok {
+						errors = append(errors, err)
+					} else {
+						erro = nil
+					}
 				}
 			}
 			switch len(errors) {

@@ -52,11 +52,12 @@ func GC(ctx context.Context, bs bstore.GCBlockstore, ls dag.LinkService, pn pin.
 
 		errors := false
 
+	loop:
 		for {
 			select {
 			case k, ok := <-keychan:
 				if !ok {
-					return
+					break loop
 				}
 				if !gcs.Has(k) {
 					err := bs.DeleteBlock(k)
@@ -65,15 +66,16 @@ func GC(ctx context.Context, bs bstore.GCBlockstore, ls dag.LinkService, pn pin.
 						errOutput <- &CoultNotDeleteBlockError{k, err}
 						//log.Debugf("Error removing key from blockstore: %s", err)
 						// continue as error is non-fatal
+						continue loop
 					}
 					select {
 					case output <- k:
 					case <-ctx.Done():
-						return
+						break loop
 					}
 				}
 			case <-ctx.Done():
-				return
+				break loop
 			}
 		}
 		if errors {
@@ -148,9 +150,9 @@ func ColoredSet(ctx context.Context, pn pin.Pinner, ls dag.LinkService, bestEffo
 	}
 }
 
-var CoundNotFetchAllLinksError = errors.New("could not retrieve some links, aborting")
+var CoundNotFetchAllLinksError = errors.New("garbage collection aborted: could not retrieve some links")
 
-var CouldNotDeleteSomeBlocksError = errors.New("could not delete some blocks")
+var CouldNotDeleteSomeBlocksError = errors.New("garbage collection incomplete: could not delete some blocks")
 
 type CoultNotFetchLinksError struct {
 	Key *cid.Cid
