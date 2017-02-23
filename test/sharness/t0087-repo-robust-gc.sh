@@ -4,7 +4,7 @@
 # MIT Licensed; see the LICENSE file in this repository.
 #
 
-test_description="Test ipfs pinning operations"
+test_description="Test robustness of garbage collector"
 
 . lib/test-lib.sh
 set -e
