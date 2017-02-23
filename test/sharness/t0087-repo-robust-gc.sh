@@ -43,7 +43,7 @@ test_gc_robust_part1() {
 
 	# make sure the permission problem is fixed on exit, otherwise cleanup
 	# will fail
-	trap "chmod 700 `dirname "$LEAF2FILE"` 2> /dev/null" 0
+	trap "chmod 700 `dirname "$LEAF2FILE"` 2> /dev/null || true" 0
 
 	test_expect_success "create a permission problem" '
 		chmod 500 `dirname "$LEAF2FILE"` &&
