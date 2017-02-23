@@ -63,7 +63,7 @@ func GC(ctx context.Context, bs bstore.GCBlockstore, ls dag.LinkService, pn pin.
 					err := bs.DeleteBlock(k)
 					if err != nil {
 						errors = true
-						errOutput <- &CoultNotDeleteBlockError{k, err}
+						errOutput <- &CouldNotDeleteBlockError{k, err}
 						//log.Debugf("Error removing key from blockstore: %s", err)
 						// continue as error is non-fatal
 						continue loop
@@ -79,7 +79,7 @@ func GC(ctx context.Context, bs bstore.GCBlockstore, ls dag.LinkService, pn pin.
 			}
 		}
 		if errors {
-			errOutput <- CouldNotDeleteSomeBlocksError
+			errOutput <- ErrCouldNotDeleteSomeBlocks
 		}
 	}()
 
@@ -109,7 +109,7 @@ func ColoredSet(ctx context.Context, pn pin.Pinner, ls dag.LinkService, bestEffo
 		links, err := ls.GetLinks(ctx, cid)
 		if err != nil {
 			errors = true
-			errOutput <- &CoultNotFetchLinksError{cid, err}
+			errOutput <- &CouldNotFetchLinksError{cid, err}
 		}
 		return links, nil
 	}
@@ -123,7 +123,7 @@ func ColoredSet(ctx context.Context, pn pin.Pinner, ls dag.LinkService, bestEffo
 		links, err := ls.GetLinks(ctx, cid)
 		if err != nil && err != dag.ErrNotFound {
 			errors = true
-			errOutput <- &CoultNotFetchLinksError{cid, err}
+			errOutput <- &CouldNotFetchLinksError{cid, err}
 		}
 		return links, nil
 	}
@@ -144,30 +144,30 @@ func ColoredSet(ctx context.Context, pn pin.Pinner, ls dag.LinkService, bestEffo
 	}
 
 	if errors {
-		return nil, CoundNotFetchAllLinksError
+		return nil, ErrCoundNotFetchAllLinks
 	} else {
 		return gcs, nil
 	}
 }
 
-var CoundNotFetchAllLinksError = errors.New("garbage collection aborted: could not retrieve some links")
+var ErrCoundNotFetchAllLinks = errors.New("garbage collection aborted: could not retrieve some links")
 
-var CouldNotDeleteSomeBlocksError = errors.New("garbage collection incomplete: could not delete some blocks")
+var ErrCouldNotDeleteSomeBlocks = errors.New("garbage collection incomplete: could not delete some blocks")
 
-type CoultNotFetchLinksError struct {
+type CouldNotFetchLinksError struct {
 	Key *cid.Cid
 	Err error
 }
 
-func (e *CoultNotFetchLinksError) Error() string {
+func (e *CouldNotFetchLinksError) Error() string {
 	return fmt.Sprintf("could not retrieve links for %s: %s", e.Key, e.Err)
 }
 
-type CoultNotDeleteBlockError struct {
+type CouldNotDeleteBlockError struct {
 	Key *cid.Cid
 	Err error
 }
 
-func (e *CoultNotDeleteBlockError) Error() string {
+func (e *CouldNotDeleteBlockError) Error() string {
 	return fmt.Sprintf("could not remove %s: %s", e.Key, e.Err)
 }
