@@ -26,7 +26,7 @@ test_gc_robust_part1() {
 	LEAF4=zb2rhnvAVvfDDnndcfQkwqNgUm94ba3zBSXyJKCfVXwU4FXx
 
 	test_expect_success "remove a leaf node from the repo manually" '
-		rm $LEAF1FILE
+		rm "$LEAF1FILE"
 	'
 
 	test_expect_success "check that the node is removed" '
@@ -43,10 +43,10 @@ test_gc_robust_part1() {
 
 	# make sure the permission problem is fixed on exit, otherwise cleanup
 	# will fail
-	trap "chmod 700 `dirname $LEAF2FILE` 2> /dev/null" 0
+	trap "chmod 700 `dirname "$LEAF2FILE"` 2> /dev/null" 0
 
 	test_expect_success "create a permission problem" '
-		chmod 500 `dirname $LEAF2FILE` &&
+		chmod 500 `dirname "$LEAF2FILE"` &&
 		test_must_fail ipfs block rm $LEAF2 2>&1 | tee err &&
 		grep -q "permission denied" err
 	'
@@ -60,7 +60,7 @@ test_gc_robust_part1() {
 	'
 
 	test_expect_success "fix the permission problem" '
-		chmod 700 `dirname $LEAF2FILE`
+		chmod 700 `dirname "$LEAF2FILE"`
 	'
 
 	test_expect_success "'ipfs repo gc' should be ok now" '
@@ -90,12 +90,12 @@ test_gc_robust_part2() {
 	'
 
 	test_expect_success "remove a leaf node from the repo manually" '
-		rm $LEAF1FILE
+		rm "$LEAF1FILE"
 	'
 
 	test_expect_success "'ipfs repo gc' should abort" '
 		test_must_fail ipfs repo gc 2>&1 | tee log &&
-		grep -q "could not retrieve links for $LEAF1t" log &&
+		grep -q "could not retrieve links for $LEAF1" log &&
 		grep -q "aborted" log
 	'
 
@@ -105,8 +105,8 @@ test_gc_robust_part2() {
 	'
 
 	test_expect_success "corrupt a key" '
-		test -e $LEAF2FILE &&
-		dd if=/dev/zero of=$LEAF2FILE count=1 bs=100 conv=notrunc
+		test -e "$LEAF2FILE" &&
+		dd if=/dev/zero of="$LEAF2FILE" count=1 bs=100 conv=notrunc
 	'
 
 	test_expect_success "'ipfs repo gc' should abort with two errors" '
