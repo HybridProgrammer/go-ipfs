@@ -88,16 +88,26 @@ func GarbageCollect(n *core.IpfsNode, ctx context.Context) error {
 	}
 	rmed := gc.GC(ctx, n.Blockstore, n.DAG, n.Pinning, roots)
 
-	return CollectResult(rmed, nil)
+	return CollectResult(ctx, rmed, nil)
 }
 
-func CollectResult(gcOut <-chan gc.Result, cb func(*cid.Cid)) error {
+func CollectResult(ctx context.Context, gcOut <-chan gc.Result, cb func(*cid.Cid)) error {
 	var errors []error
-	for res := range gcOut {
-		if res.Error != nil {
-			errors = append(errors, res.Error)
-		} else if res.KeyRemoved != nil && cb != nil {
-			cb(res.KeyRemoved)
+loop:
+	for {
+		select {
+		case res, ok := <-gcOut:
+			if !ok {
+				break loop
+			}
+			if res.Error != nil {
+				errors = append(errors, res.Error)
+			} else if res.KeyRemoved != nil && cb != nil {
+				cb(res.KeyRemoved)
+			}
+		case <-ctx.Done():
+			errors = append(errors, ctx.Err())
+			break loop
 		}
 	}
 

@@ -90,7 +90,7 @@ order to reclaim hard disk space.
 					}
 				}
 			} else {
-				lastErr = corerepo.CollectResult(gcOutChan, func(k *cid.Cid) {
+				lastErr = corerepo.CollectResult(req.Context(), gcOutChan, func(k *cid.Cid) {
 					outChan <- &GcResult{Key: k}
 				})
 			}
