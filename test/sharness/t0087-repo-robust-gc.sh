@@ -66,16 +66,16 @@ test_gc_robust_part1() {
 
 	test_expect_success "create a permission problem" '
 		chmod 500 `dirname "$LEAF2FILE"` &&
-		test_must_fail ipfs block rm $LEAF2 2>&1 | tee err &&
-		grep -q "permission denied" err
+		test_must_fail ipfs block rm $LEAF2 2>&1 | tee block_rm_err &&
+		grep -q "permission denied" block_rm_err
 	'
 
 	test_expect_success "'ipfs repo gc' should still run and remove as much as possible" '
-		test_must_fail ipfs repo gc 2>&1 | tee log &&
-		grep -q "removed $HASH1" log &&
-		grep -q "could not remove $LEAF2" log &&
-		grep -q "removed $LEAF3" log &&
-		grep -q "removed $LEAF4" log
+		test_must_fail ipfs repo gc 2>&1 | tee repo_gc_out &&
+		grep -q "removed $HASH1" repo_gc_out &&
+		grep -q "could not remove $LEAF2" repo_gc_out &&
+		grep -q "removed $LEAF3" repo_gc_out &&
+		grep -q "removed $LEAF4" repo_gc_out
 	'
 
 	test_expect_success "fix the permission problem" '
@@ -83,8 +83,8 @@ test_gc_robust_part1() {
 	'
 
 	test_expect_success "'ipfs repo gc' should be ok now" '
-		ipfs repo gc | tee log
-		grep -q "removed $LEAF2" log
+		ipfs repo gc | tee repo_gc_out
+		grep -q "removed $LEAF2" repo_gc_out
 	'
 }
 
@@ -113,9 +113,9 @@ test_gc_robust_part2() {
 	'
 
 	test_expect_success "'ipfs repo gc' should abort" '
-		test_must_fail ipfs repo gc 2>&1 | tee log &&
-		grep -q "could not retrieve links for $LEAF1" log &&
-		grep -q "aborted" log
+		test_must_fail ipfs repo gc 2>&1 | tee repo_gc_out &&
+		grep -q "could not retrieve links for $LEAF1" repo_gc_out &&
+		grep -q "aborted" repo_gc_out
 	'
 
 	test_expect_success "test that garbage collector really aborted" '
@@ -129,10 +129,10 @@ test_gc_robust_part2() {
 	'
 
 	test_expect_success "'ipfs repo gc' should abort with two errors" '
-		test_must_fail ipfs repo gc 2>&1 | tee log &&
-		grep -q "could not retrieve links for $LEAF1" log &&
-		grep -q "cound not retreive links for $LEAF2" log
-		grep -q "aborted" log
+		test_must_fail ipfs repo gc 2>&1 | tee repo_gc_out &&
+		grep -q "could not retrieve links for $LEAF1" repo_gc_out &&
+		grep -q "cound not retreive links for $LEAF2" repo_gc_out
+		grep -q "aborted" repo_gc_out
 	'
 
 	test_expect_success "unpin 1MB file" '
@@ -140,9 +140,9 @@ test_gc_robust_part2() {
 	'
 
 	test_expect_success "'ipfs repo gc' should be fine now" '
-		ipfs repo gc | tee log
-		grep -q "removed $HASH2" log &&
-		grep -q "removed $LEAF2" log
+		ipfs repo gc | tee repo_gc_out
+		grep -q "removed $HASH2" repo_gc_out &&
+		grep -q "removed $LEAF2" repo_gc_out
 	'
 }
 
