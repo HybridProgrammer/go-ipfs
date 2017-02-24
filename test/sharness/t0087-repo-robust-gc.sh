@@ -16,6 +16,8 @@ test_gc_robust_part1() {
 		HASH1=`ipfs add --raw-leaves -q afile`
 	'
 
+	HASH1FILE=.ipfs/blocks/L3/CIQNIPL4GP62ZMNNSLZ2G33Z3T5VAN3YHCJTGT5FG45XWH5FGZRXL3A.data
+
 	LEAF1=zb2rhZWKCMcHCfCym41ocwE5BhNQsEVLrwBkLEQaxJzRHHZch
 	LEAF1FILE=.ipfs/blocks/C2/AFKREIBKRCW7HF6NHR6DVWECQXC5RQC7U7PKHKTI53BYYZNQP23DK5FC2Y.data
 
@@ -23,7 +25,7 @@ test_gc_robust_part1() {
 	LEAF2FILE=.ipfs/blocks/Q6/BAFKREIDFSUIR43GJPHNDXXQA45GJVNRZBET3CRPUMYJCBLK3RTN7ZAMQ6Q
 
 	LEAF3=zb2rhnwyvreekPqEMAbKqs35KYHxkNi7pXED7L2TfJKveTTva
-	LEAF4=zb2rhnvAVvfDDnndcfQkwqNgUm94ba3zBSXyJKCfVXwU4FXx
+	LEAF4=zb2rhnvAVvfDDnndcfQkwqNgUm94ba3zBSXyJKCfVXwU4FXx2
 
 	test_expect_success "remove a leaf node from the repo manually" '
 		rm "$LEAF1FILE"
@@ -35,6 +37,23 @@ test_gc_robust_part1() {
 
 	test_expect_success "'ipfs repo gc' should still be be fine" '
 		ipfs repo gc
+	'
+
+	test_expect_success "corrupt the root node of 1MB file" '
+		ls -l "$HASH1FILE"
+		test -e "$HASH1FILE" &&
+		dd if=/dev/zero of="$HASH1FILE" count=1 bs=100 conv=notrunc
+	'
+
+	test_expect_success "'ipfs repo gc' should abort without removing anything" '
+		test_must_fail ipfs repo gc 2>&1 | tee gc_err &&
+		grep -q "could not retrieve links for $HASH1" gc_err &&
+		grep -q "aborted" gc_err
+	'
+
+	test_expect_success "leaf nodes where not removed after gc" '
+		ipfs cat $LEAF3 > /dev/null &&
+		ipfs cat $LEAF4 > /dev/null
 	'
 
 	test_expect_success "unpin the 1MB file" '
