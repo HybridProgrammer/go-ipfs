@@ -69,7 +69,7 @@ order to reclaim hard disk space.
 
 		gcOutChan := corerepo.GarbageCollectAsync(n, req.Context())
 
-		outChan := make(chan interface{}, len(gcOutChan))
+		outChan := make(chan interface{}, cap(gcOutChan))
 		res.SetOutput((<-chan interface{})(outChan))
 
 		go func() {
