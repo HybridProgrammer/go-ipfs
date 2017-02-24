@@ -40,7 +40,6 @@ test_gc_robust_part1() {
 	'
 
 	test_expect_success "corrupt the root node of 1MB file" '
-		ls -l "$HASH1FILE"
 		test -e "$HASH1FILE" &&
 		dd if=/dev/zero of="$HASH1FILE" count=1 bs=100 conv=notrunc
 	'
@@ -51,7 +50,7 @@ test_gc_robust_part1() {
 		grep -q "aborted" gc_err
 	'
 
-	test_expect_success "leaf nodes where not removed after gc" '
+	test_expect_success "leaf nodes were not removed after gc" '
 		ipfs cat $LEAF3 > /dev/null &&
 		ipfs cat $LEAF4 > /dev/null
 	'

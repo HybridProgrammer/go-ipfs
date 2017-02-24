@@ -147,13 +147,13 @@ func ColoredSet(ctx context.Context, pn pin.Pinner, ls dag.LinkService, bestEffo
 	}
 
 	if errors {
-		return nil, ErrCoundNotFetchAllLinks
+		return nil, ErrCouldNotFetchAllLinks
 	} else {
 		return gcs, nil
 	}
 }
 
-var ErrCoundNotFetchAllLinks = errors.New("garbage collection aborted: could not retrieve some links")
+var ErrCouldNotFetchAllLinks = errors.New("garbage collection aborted: could not retrieve some links")
 
 var ErrCouldNotDeleteSomeBlocks = errors.New("garbage collection incomplete: could not delete some blocks")
 
