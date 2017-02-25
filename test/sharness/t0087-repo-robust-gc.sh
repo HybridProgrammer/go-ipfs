@@ -103,7 +103,7 @@ test_gc_robust_part2() {
 	test_expect_success "add some additional unpinned content" '
 		random 1000 3 > junk1 &&
 		random 1000 4 > junk2 &&
-		JUNK1=`ipfs add --pin=false -q junk1`
+		JUNK1=`ipfs add --pin=false -q junk1` &&
 		JUNK2=`ipfs add --pin=false -q junk2`
 	'
 
@@ -130,7 +130,7 @@ test_gc_robust_part2() {
 	test_expect_success "'ipfs repo gc' should abort with two errors" '
 		test_must_fail ipfs repo gc 2>&1 | tee repo_gc_out &&
 		grep -q "could not retrieve links for $LEAF1" repo_gc_out &&
-		grep -q "cound not retreive links for $LEAF2" repo_gc_out
+		grep -q "could not retrieve links for $LEAF2" repo_gc_out &&
 		grep -q "aborted" repo_gc_out
 	'
 
@@ -146,7 +146,7 @@ test_gc_robust_part2() {
 	'
 
 	test_expect_success "'ipfs repo gc' should be fine now" '
-		ipfs repo gc | tee repo_gc_out
+		ipfs repo gc | tee repo_gc_out &&
 		grep -q "removed $HASH2" repo_gc_out &&
 		grep -q "removed $LEAF2" repo_gc_out
 	'
